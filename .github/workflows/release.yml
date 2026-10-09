@@ -94,27 +94,27 @@ jobs:
         run: |
           export PATH=$PATH:$GOPATH/bin
           ./mage-static release
-      - name: GPG setup
-        uses: kolaente/action-gpg@main
-        with:
-          gpg-passphrase: "${{ secrets.RELEASE_GPG_PASSPHRASE }}"
-          gpg-sign-key: "${{ secrets.RELEASE_GPG_SIGN_KEY }}"
-      - name: sign
-        run: |
-          echo "=== GPG agent status ==="
-          gpg-connect-agent 'keyinfo --list' /bye || true
-          echo "=== GPG secret keys ==="
-          gpg -K --with-keygrip
-          echo "=== GPG public keys ==="
-          gpg --list-keys
-          echo "=== GNUPG directory contents ==="
-          ls -la ~/.gnupg/
-          ls -la ~/.gnupg/private-keys-v1.d/ || true
-          echo "=== Signing files ==="
-          ls -hal dist/zip/*
-          for file in dist/zip/*; do
-            gpg -v --default-key 7D061A4AA61436B40713D42EFF054DACD908493A -b --batch --yes --passphrase "${{ secrets.RELEASE_GPG_PASSPHRASE }}" --pinentry-mode loopback --sign "$file"
-          done
+      # - name: GPG setup
+      #   uses: kolaente/action-gpg@main
+      #   with:
+      #     gpg-passphrase: "${{ secrets.RELEASE_GPG_PASSPHRASE }}"
+      #     gpg-sign-key: "${{ secrets.RELEASE_GPG_SIGN_KEY }}"
+      # - name: sign
+      #   run: |
+      #     echo "=== GPG agent status ==="
+      #     gpg-connect-agent 'keyinfo --list' /bye || true
+      #     echo "=== GPG secret keys ==="
+      #     gpg -K --with-keygrip
+      #     echo "=== GPG public keys ==="
+      #     gpg --list-keys
+      #     echo "=== GNUPG directory contents ==="
+      #     ls -la ~/.gnupg/
+      #     ls -la ~/.gnupg/private-keys-v1.d/ || true
+      #     echo "=== Signing files ==="
+      #     ls -hal dist/zip/*
+      #     for file in dist/zip/*; do
+      #       gpg -v --default-key 7D061A4AA61436B40713D42EFF054DACD908493A -b --batch --yes --passphrase "${{ secrets.RELEASE_GPG_PASSPHRASE }}" --pinentry-mode loopback --sign "$file"
+      #     done
       # - name: Upload
       #   uses: kolaente/s3-action@41963184b524ccac734ea4d8c964ac74b5b1af89 # v1.2.1
       #   with:
