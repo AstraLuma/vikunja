@@ -117,17 +117,17 @@ jobs:
           for file in dist/zip/*; do
             gpg -v --default-key 7D061A4AA61436B40713D42EFF054DACD908493A -b --batch --yes --passphrase "${{ secrets.RELEASE_GPG_PASSPHRASE }}" --pinentry-mode loopback --sign "$file"
           done
-      - name: Upload
-        uses: kolaente/s3-action@41963184b524ccac734ea4d8c964ac74b5b1af89 # v1.2.1
-        with:
-          s3-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
-          s3-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
-          s3-endpoint: ${{ secrets.S3_ENDPOINT }}
-          s3-bucket: ${{ secrets.S3_BUCKET }}
-          s3-region: ${{ secrets.S3_REGION }}
-          target-path: /vikunja/${{ github.ref_type == 'tag' && steps.ghd.outputs.describe || 'unstable' }}
-          files: "dist/zip/*"
-          strip-path-prefix: dist/zip/
+      # - name: Upload
+      #   uses: kolaente/s3-action@41963184b524ccac734ea4d8c964ac74b5b1af89 # v1.2.1
+      #   with:
+      #     s3-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+      #     s3-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+      #     s3-endpoint: ${{ secrets.S3_ENDPOINT }}
+      #     s3-bucket: ${{ secrets.S3_BUCKET }}
+      #     s3-region: ${{ secrets.S3_REGION }}
+      #     target-path: /vikunja/${{ github.ref_type == 'tag' && steps.ghd.outputs.describe || 'unstable' }}
+      #     files: "dist/zip/*"
+      #     strip-path-prefix: dist/zip/
       - name: Store Binaries
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
@@ -182,17 +182,17 @@ jobs:
           packager: ${{ matrix.package }}
           target: ./dist/os-packages/vikunja-${{ github.ref_type == 'tag' && steps.ghd.outputs.describe || 'unstable' }}-x86_64.${{ matrix.package }}
           config: ./nfpm.yaml
-      - name: Upload
-        uses: kolaente/s3-action@41963184b524ccac734ea4d8c964ac74b5b1af89 # v1.2.1
-        with:
-          s3-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
-          s3-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
-          s3-endpoint: ${{ secrets.S3_ENDPOINT }}
-          s3-bucket: ${{ secrets.S3_BUCKET }}
-          s3-region: ${{ secrets.S3_REGION }}
-          target-path: /vikunja/${{ github.ref_type == 'tag' && steps.ghd.outputs.describe || 'unstable' }}
-          files: "dist/os-packages/*"
-          strip-path-prefix: dist/os-packages/
+      # - name: Upload
+      #   uses: kolaente/s3-action@41963184b524ccac734ea4d8c964ac74b5b1af89 # v1.2.1
+      #   with:
+      #     s3-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+      #     s3-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+      #     s3-endpoint: ${{ secrets.S3_ENDPOINT }}
+      #     s3-bucket: ${{ secrets.S3_BUCKET }}
+      #     s3-region: ${{ secrets.S3_REGION }}
+      #     target-path: /vikunja/${{ github.ref_type == 'tag' && steps.ghd.outputs.describe || 'unstable' }}
+      #     files: "dist/os-packages/*"
+      #     strip-path-prefix: dist/os-packages/
       - name: Store OS Packages
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: ${{ github.ref_type == 'tag' }}
@@ -215,16 +215,16 @@ jobs:
         run: |
           chmod +x ./mage-static
           ./mage-static generate:config-yaml 1
-      - name: Upload to S3
-        uses: kolaente/s3-action@41963184b524ccac734ea4d8c964ac74b5b1af89 # v1.2.1
-        with:
-          s3-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
-          s3-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
-          s3-endpoint: ${{ secrets.S3_ENDPOINT }}
-          s3-bucket: ${{ secrets.S3_BUCKET }}
-          s3-region: ${{ secrets.S3_REGION }}
-          target-path: /vikunja/${{ github.ref_type == 'tag' && steps.ghd.outputs.describe || 'unstable' }}
-          files: "config.yml.sample"
+      # - name: Upload to S3
+      #   uses: kolaente/s3-action@41963184b524ccac734ea4d8c964ac74b5b1af89 # v1.2.1
+      #   with:
+      #     s3-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+      #     s3-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+      #     s3-endpoint: ${{ secrets.S3_ENDPOINT }}
+      #     s3-bucket: ${{ secrets.S3_BUCKET }}
+      #     s3-region: ${{ secrets.S3_REGION }}
+      #     target-path: /vikunja/${{ github.ref_type == 'tag' && steps.ghd.outputs.describe || 'unstable' }}
+      #     files: "config.yml.sample"
 
   desktop:
     strategy:
@@ -265,18 +265,18 @@ jobs:
         run: |
           pnpm install  --frozen-lockfile --prefer-offline --fetch-timeout 100000
           node build.js "${{ steps.ghd.outputs.describe }}" ${{ github.ref_type == 'tag' }}
-      - name: Upload to S3
-        uses: kolaente/s3-action@41963184b524ccac734ea4d8c964ac74b5b1af89 # v1.2.1
-        with:
-          s3-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
-          s3-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
-          s3-endpoint: ${{ secrets.S3_ENDPOINT }}
-          s3-bucket: ${{ secrets.S3_BUCKET }}
-          s3-region: ${{ secrets.S3_REGION }}
-          files: "desktop/dist/Vikunja*"
-          target-path: /desktop/${{ github.ref_type == 'tag' && steps.ghd.outputs.describe || 'unstable' }}
-          strip-path-prefix: desktop/dist/
-          exclude: "desktop/dist/*.blockmap"
+      # - name: Upload to S3
+      #   uses: kolaente/s3-action@41963184b524ccac734ea4d8c964ac74b5b1af89 # v1.2.1
+      #   with:
+      #     s3-access-key-id: ${{ secrets.S3_ACCESS_KEY }}
+      #     s3-secret-access-key: ${{ secrets.S3_SECRET_KEY }}
+      #     s3-endpoint: ${{ secrets.S3_ENDPOINT }}
+      #     s3-bucket: ${{ secrets.S3_BUCKET }}
+      #     s3-region: ${{ secrets.S3_REGION }}
+      #     files: "desktop/dist/Vikunja*"
+      #     target-path: /desktop/${{ github.ref_type == 'tag' && steps.ghd.outputs.describe || 'unstable' }}
+      #     strip-path-prefix: desktop/dist/
+      #     exclude: "desktop/dist/*.blockmap"
       - name: Store Desktop Package
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         if: ${{ github.ref_type == 'tag' }}
