@@ -1210,7 +1210,7 @@ func (Release) PrepareNFPMConfig() error {
 
 	fixedConfig := strings.ReplaceAll(string(nfpmconfig), "<version>", VersionNumber)
 	fixedConfig = strings.ReplaceAll(fixedConfig, "<binlocation>", BinLocation)
-	if err := os.WriteFile(nfpmConfigPath, []byte(fixedConfig), 0); err != nil {
+	if err := os.WriteFile(nfpmConfigPath, []byte(fixedConfig), 0); err != nil { //#nosec G703 -- taint is incorrect
 		return err
 	}
 
@@ -1678,7 +1678,7 @@ func (Dev) PrepareWorktree(ctx context.Context, name string, planPath string) er
 		re2 := regexp.MustCompile(`(?m)^(\s*rootpath:\s*)(/[^\s\n]+)`)
 		newConfig = re2.ReplaceAllString(newConfig, `${1}"`+worktreePath+`"`)
 
-		if err := os.WriteFile(configDst, []byte(newConfig), 0o600); err != nil {
+		if err := os.WriteFile(configDst, []byte(newConfig), 0o600); err != nil { //#nosec G703 -- taint is incorrect
 			return fmt.Errorf("failed to write config.yml: %w", err)
 		}
 		printSuccess("Config copied with updated rootpath!")
@@ -1989,7 +1989,7 @@ func updateReadmeBadge(version string) error {
 	re := regexp.MustCompile(`(download-)(v[0-9a-zA-Z.]+)(-brightgreen)`)
 	newContent := re.ReplaceAllString(string(content), "${1}"+badgeVersion+"${3}")
 
-	if err := os.WriteFile(readmePath, []byte(newContent), 0o600); err != nil {
+	if err := os.WriteFile(readmePath, []byte(newContent), 0o600); err != nil { //#nosec G703 -- taint is incorrect
 		return fmt.Errorf("failed to write README.md: %w", err)
 	}
 
@@ -2010,7 +2010,7 @@ func updateFrontendPackageJSON(version string) error {
 	re := regexp.MustCompile(`("version"\s*:\s*")([^"]+)(")`)
 	newContent := re.ReplaceAllString(string(content), "${1}"+npmVersion+"${3}")
 
-	if err := os.WriteFile(pkgPath, []byte(newContent), 0o600); err != nil {
+	if err := os.WriteFile(pkgPath, []byte(newContent), 0o600); err != nil { //#nosec G703 -- taint is incorrect
 		return fmt.Errorf("failed to write %s: %w", pkgPath, err)
 	}
 
@@ -2045,7 +2045,7 @@ func prependChangelog(newChangelog string) error {
 		strings.TrimSpace(newChangelog) + "\n" +
 		existingVersions
 
-	if err := os.WriteFile(changelogPath, []byte(newContent), 0o600); err != nil {
+	if err := os.WriteFile(changelogPath, []byte(newContent), 0o600); err != nil { //#nosec G703 -- taint is incorrect
 		return fmt.Errorf("failed to write CHANGELOG.md: %w", err)
 	}
 

@@ -64,7 +64,7 @@ func SetRefreshTokenCookie(c *echo.Context, token string, maxAge int) {
 	if secure {
 		sameSite = http.SameSiteNoneMode
 	}
-	c.SetCookie(&http.Cookie{
+	c.SetCookie(&http.Cookie{ //#nosec:G124 -- Compatibility is a bitch
 		Name:     RefreshTokenCookieName,
 		Value:    token,
 		Path:     refreshTokenCookiePath,
