@@ -23,6 +23,7 @@
 			</CustomTransition>
 		</h3>
 		<Editor
+			ref="editorRef"
 			v-model="description"
 			class="tiptap__task-description"
 			:is-edit-enabled="canWrite"
@@ -80,6 +81,9 @@ const loading = computed(() => taskStore.isLoading)
 
 const changeTimeout = ref<ReturnType<typeof setTimeout> | null>(null)
 
+// The editor batches model updates while typing; pull in the latest text before saving.
+const editorRef = ref<{flush: () => void} | null>(null)
+
 const descriptionStorageKey = computed(() => `task-description-${props.modelValue.id}`)
 
 async function saveWithDelay() {
@@ -102,13 +106,17 @@ async function saveWithDelay() {
 }
 
 onBeforeUnmount(async () => {
+	editorRef.value?.flush()
 	await save() // Save before unmounting to handle modal race condition
 	if (changeTimeout.value !== null) {
 		clearTimeout(changeTimeout.value)
 	}
 })
 
-onBeforeRouteLeave(() => save())
+onBeforeRouteLeave(() => {
+	editorRef.value?.flush()
+	return save()
+})
 
 async function save() {
 	if (!hasChanges.value) {

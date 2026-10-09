@@ -20,7 +20,7 @@
 				<BaseButton
 					v-tooltip="$t('input.editor.bold')"
 					class="editor-bubble__button"
-					:class="{ 'is-active': editor.isActive('bold') }"
+					:class="{ 'is-active': bubbleActive.bold }"
 					@click="() => editor?.chain().focus().toggleBold().run()"
 				>
 					<Icon :icon="['fas', 'bold']" />
@@ -28,7 +28,7 @@
 				<BaseButton
 					v-tooltip="$t('input.editor.italic')"
 					class="editor-bubble__button"
-					:class="{ 'is-active': editor.isActive('italic') }"
+					:class="{ 'is-active': bubbleActive.italic }"
 					@click="() => editor?.chain().focus().toggleItalic().run()"
 				>
 					<Icon :icon="['fas', 'italic']" />
@@ -36,7 +36,7 @@
 				<BaseButton
 					v-tooltip="$t('input.editor.underline')"
 					class="editor-bubble__button"
-					:class="{ 'is-active': editor.isActive('underline') }"
+					:class="{ 'is-active': bubbleActive.underline }"
 					@click="() => editor?.chain().focus().toggleUnderline().run()"
 				>
 					<Icon :icon="['fas', 'underline']" />
@@ -44,7 +44,7 @@
 				<BaseButton
 					v-tooltip="$t('input.editor.strikethrough')"
 					class="editor-bubble__button"
-					:class="{ 'is-active': editor.isActive('strike') }"
+					:class="{ 'is-active': bubbleActive.strike }"
 					@click="() => editor?.chain().focus().toggleStrike().run()"
 				>
 					<Icon :icon="['fas', 'strikethrough']" />
@@ -52,7 +52,7 @@
 				<BaseButton
 					v-tooltip="$t('input.editor.code')"
 					class="editor-bubble__button"
-					:class="{ 'is-active': editor.isActive('code') }"
+					:class="{ 'is-active': bubbleActive.code }"
 					@click="() => editor?.chain().focus().toggleCode().run()"
 				>
 					<Icon :icon="['fas', 'code']" />
@@ -60,7 +60,7 @@
 				<BaseButton
 					v-tooltip="$t('input.editor.link')"
 					class="editor-bubble__button"
-					:class="{ 'is-active': editor.isActive('link') }"
+					:class="{ 'is-active': bubbleActive.link }"
 					@click="setLink"
 				>
 					<Icon :icon="['fas', 'link']" />
@@ -173,7 +173,8 @@ import suggestionSetup from './suggestion'
 import mentionSuggestionSetup from './mention/mentionSuggestion'
 import MentionUser from './mention/MentionUser.vue'
 
-import {common, createLowlight} from 'lowlight'
+import {lowlight} from './lowlight'
+import {useEditorState} from './useEditorState'
 
 import type {BottomAction, UploadCallback} from './types'
 import type {ITask} from '@/modelTypes/ITask'
@@ -416,10 +417,15 @@ const extensions : Extensions = [
 	StarterKit.configure({
 		codeBlock: false,
 		hardBreak: false,
+		// Both are added below with their own configuration. Leaving StarterKit's copies
+		// enabled registers each of them twice, which tiptap warns about and which made
+		// the default Link (openOnClick: true, no protocol validation) active as well.
+		link: false,
+		underline: false,
 	}),
 
 	CodeBlockLowlight.configure({
-		lowlight: createLowlight(common),
+		lowlight,
 	}),
 	HardBreak.extend({
 		addKeyboardShortcuts() {
@@ -437,7 +443,7 @@ const extensions : Extensions = [
 
 	Placeholder.configure({
 		placeholder({editor}) {
-			if (!isEditing.value || editor.getText() !== '' && !editor.isFocused) {
+			if (!isEditing.value || !editor.isEmpty && !editor.isFocused) {
 				return ''
 			}
 
@@ -563,34 +569,82 @@ if (props.enableDiscardShortcut) {
 	}))
 }
 
+// Serializing the document and writing the draft to localStorage on every keystroke makes
+// typing lag on low-end phones, so both are batched until typing pauses.
+const BUBBLE_DELAY_MS = 300
+let bubbleTimeout: ReturnType<typeof setTimeout> | null = null
+
 const editor = useEditor({
 	// eslint-disable-next-line vue/no-ref-object-reactivity-loss
 	editable: isEditing.value,
 	extensions: extensions,
-	onUpdate: bubbleNow,
+	onUpdate: scheduleBubble,
+	// Clicking anything outside the editor (a submit button, closing a modal) blurs it first,
+	// so nobody reads a model value that is still missing the last keystrokes.
+	onBlur: () => flushBubble(),
 	parseOptions: {
 		preserveWhitespace: true,
 	},
 })
 
+const {state: bubbleActive} = useEditorState(editor, instance => ({
+	bold: instance.isActive('bold'),
+	italic: instance.isActive('italic'),
+	underline: instance.isActive('underline'),
+	strike: instance.isActive('strike'),
+	code: instance.isActive('code'),
+	link: instance.isActive('link'),
+}))
+
 watchEffect(() => editor.value?.setEditable(isEditing.value, false))
+
+// Last HTML this component emitted, so the watcher below can recognise its own echo
+// without serializing the whole document again.
+let lastEmittedHtml: string | null = null
 
 watch(
 	modelValue,
 	value => {
 		if (!editor?.value) return
 
-		if (editor.value.getHTML() === value) {
+		if (value === lastEmittedHtml || editor.value.getHTML() === value) {
 			return
 		}
 
+		cancelScheduledBubble()
+		lastEmittedHtml = null
 		setModeAndValue(value)
 	},
 	{immediate: true},
 )
 
+function cancelScheduledBubble() {
+	if (bubbleTimeout !== null) {
+		clearTimeout(bubbleTimeout)
+		bubbleTimeout = null
+	}
+}
+
+function scheduleBubble() {
+	contentHasChanged.value = true
+	cancelScheduledBubble()
+	bubbleTimeout = setTimeout(bubbleNow, BUBBLE_DELAY_MS)
+}
+
+function flushBubble() {
+	if (bubbleTimeout !== null) {
+		bubbleNow()
+	}
+}
+
 function bubbleNow() {
-	const editorVal = editor.value!.getHTML()
+	cancelScheduledBubble()
+
+	if (!editor.value || editor.value.isDestroyed) {
+		return
+	}
+
+	const editorVal = editor.value.getHTML()
 	if (editorVal === modelValue.value ||
 		(editorVal === '<p></p>') && modelValue.value === '') {
 		return
@@ -603,8 +657,11 @@ function bubbleNow() {
 		saveEditorDraft(props.storageKey, editorVal)
 	}
 
+	lastEmittedHtml = editorVal
 	modelValue.value = editorVal
 }
+
+defineExpose({flush: flushBubble})
 
 function bubbleSave() {
 	bubbleNow()
@@ -622,6 +679,7 @@ function bubbleSave() {
 }
 
 function exitEditMode() {
+	flushBubble()
 	editor.value?.commands.setContent(lastSavedState, {
 		...defaultSetContentOptions,
 		emitUpdate: false,
@@ -656,6 +714,7 @@ onBeforeUnmount(() => {
 		tiptapInstanceRef.value?.removeEventListener('keydown', handleEscapeKey)
 	}
 
+	flushBubble()
 	editor.value?.destroy()
 })
 

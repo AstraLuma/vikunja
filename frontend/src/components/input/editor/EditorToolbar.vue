@@ -4,7 +4,7 @@
 			<BaseButton
 				v-tooltip="$t('input.editor.heading1')"
 				class="editor-toolbar__button"
-				:class="{ 'is-active': editor.isActive('heading', { level: 1 }) }"
+				:class="{ 'is-active': active.heading1 }"
 				@click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
 			>
 				<span class="icon">
@@ -19,7 +19,7 @@
 			<BaseButton
 				v-tooltip="$t('input.editor.heading2')"
 				class="editor-toolbar__button"
-				:class="{ 'is-active': editor.isActive('heading', { level: 2 }) }"
+				:class="{ 'is-active': active.heading2 }"
 				@click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
 			>
 				<span class="icon">
@@ -34,7 +34,7 @@
 			<BaseButton
 				v-tooltip="$t('input.editor.heading3')"
 				class="editor-toolbar__button"
-				:class="{ 'is-active': editor.isActive('heading', { level: 3 }) }"
+				:class="{ 'is-active': active.heading3 }"
 				@click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
 			>
 				<span class="icon">
@@ -52,7 +52,7 @@
 			<BaseButton
 				v-tooltip="$t('input.editor.bold')"
 				class="editor-toolbar__button"
-				:class="{ 'is-active': editor.isActive('bold') }"
+				:class="{ 'is-active': active.bold }"
 				@click="editor.chain().focus().toggleBold().run()"
 			>
 				<span class="icon">
@@ -63,7 +63,7 @@
 			<BaseButton
 				v-tooltip="$t('input.editor.italic')"
 				class="editor-toolbar__button"
-				:class="{ 'is-active': editor.isActive('italic') }"
+				:class="{ 'is-active': active.italic }"
 				@click="editor.chain().focus().toggleItalic().run()"
 			>
 				<span class="icon">
@@ -74,7 +74,7 @@
 			<BaseButton
 				v-tooltip="$t('input.editor.underline')"
 				class="editor-toolbar__button"
-				:class="{ 'is-active': editor.isActive('underline') }"
+				:class="{ 'is-active': active.underline }"
 				@click="editor.chain().focus().toggleUnderline().run()"
 			>
 				<span class="icon">
@@ -85,7 +85,7 @@
 			<BaseButton
 				v-tooltip="$t('input.editor.strikethrough')"
 				class="editor-toolbar__button"
-				:class="{ 'is-active': editor.isActive('strike') }"
+				:class="{ 'is-active': active.strike }"
 				@click="editor.chain().focus().toggleStrike().run()"
 			>
 				<span class="icon">
@@ -99,7 +99,7 @@
 			<BaseButton
 				v-tooltip="$t('input.editor.code')"
 				class="editor-toolbar__button"
-				:class="{ 'is-active': editor.isActive('codeBlock') }"
+				:class="{ 'is-active': active.codeBlock }"
 				@click="editor.chain().focus().toggleCodeBlock().run()"
 			>
 				<span class="icon">
@@ -110,7 +110,7 @@
 			<BaseButton
 				v-tooltip="$t('input.editor.quote')"
 				class="editor-toolbar__button"
-				:class="{ 'is-active': editor.isActive('blockquote') }"
+				:class="{ 'is-active': active.blockquote }"
 				@click="editor.chain().focus().toggleBlockquote().run()"
 			>
 				<span class="icon">
@@ -124,7 +124,7 @@
 			<BaseButton
 				v-tooltip="$t('input.editor.bulletList')"
 				class="editor-toolbar__button"
-				:class="{ 'is-active': editor.isActive('bulletList') }"
+				:class="{ 'is-active': active.bulletList }"
 				@click="editor.chain().focus().toggleBulletList().run()"
 			>
 				<span class="icon">
@@ -135,7 +135,7 @@
 			<BaseButton
 				v-tooltip="$t('input.editor.orderedList')"
 				class="editor-toolbar__button"
-				:class="{ 'is-active': editor.isActive('orderedList') }"
+				:class="{ 'is-active': active.orderedList }"
 				@click="editor.chain().focus().toggleOrderedList().run()"
 			>
 				<span class="icon">
@@ -146,7 +146,7 @@
 			<BaseButton
 				v-tooltip="$t('input.editor.taskList')"
 				class="editor-toolbar__button"
-				:class="{ 'is-active': editor.isActive('taskList') }"
+				:class="{ 'is-active': active.taskList }"
 				@click="editor.chain().focus().toggleTaskList().run()"
 			>
 				<span class="icon">
@@ -173,7 +173,7 @@
 			<BaseButton
 				v-tooltip="$t('input.editor.link')"
 				class="editor-toolbar__button"
-				:class="{ 'is-active': editor.isActive('link') }"
+				:class="{ 'is-active': active.link }"
 				title="set link"
 				@click="setLink"
 			>
@@ -185,7 +185,7 @@
 			<BaseButton
 				v-tooltip="$t('input.editor.text')"
 				class="editor-toolbar__button"
-				:class="{ 'is-active': editor.isActive('paragraph') }"
+				:class="{ 'is-active': active.paragraph }"
 				title="paragraph"
 				@click="editor.chain().focus().setParagraph().run()"
 			>
@@ -235,7 +235,7 @@
 			<BaseButton
 				v-tooltip="$t('input.editor.table.title')"
 				class="editor-toolbar__button"
-				:class="{ 'is-active': editor.isActive('table') }"
+				:class="{ 'is-active': active.table }"
 				@click="toggleTableMode"
 			>
 				<span class="icon">
@@ -261,98 +261,84 @@
 				</BaseButton>
 				<BaseButton
 					class="editor-toolbar__button"
-					:disabled="!editor.can().addColumnBefore"
 					@click="editor.chain().focus().addColumnBefore().run()"
 				>
 					{{ $t('input.editor.table.addColumnBefore') }}
 				</BaseButton>
 				<BaseButton
 					class="editor-toolbar__button"
-					:disabled="!editor.can().addColumnAfter"
 					@click="editor.chain().focus().addColumnAfter().run()"
 				>
 					{{ $t('input.editor.table.addColumnAfter') }}
 				</BaseButton>
 				<BaseButton
 					class="editor-toolbar__button"
-					:disabled="!editor.can().deleteColumn"
 					@click="editor.chain().focus().deleteColumn().run()"
 				>
 					{{ $t('input.editor.table.deleteColumn') }}
 				</BaseButton>
 				<BaseButton
 					class="editor-toolbar__button"
-					:disabled="!editor.can().addRowBefore"
 					@click="editor.chain().focus().addRowBefore().run()"
 				>
 					{{ $t('input.editor.table.addRowBefore') }}
 				</BaseButton>
 				<BaseButton
 					class="editor-toolbar__button"
-					:disabled="!editor.can().addRowAfter"
 					@click="editor.chain().focus().addRowAfter().run()"
 				>
 					{{ $t('input.editor.table.addRowAfter') }}
 				</BaseButton>
 				<BaseButton
 					class="editor-toolbar__button"
-					:disabled="!editor.can().deleteRow"
 					@click="editor.chain().focus().deleteRow().run()"
 				>
 					{{ $t('input.editor.table.deleteRow') }}
 				</BaseButton>
 				<BaseButton
 					class="editor-toolbar__button"
-					:disabled="!editor.can().deleteTable"
 					@click="editor.chain().focus().deleteTable().run()"
 				>
 					{{ $t('input.editor.table.deleteTable') }}
 				</BaseButton>
 				<BaseButton
 					class="editor-toolbar__button"
-					:disabled="!editor.can().mergeCells"
 					@click="editor.chain().focus().mergeCells().run()"
 				>
 					{{ $t('input.editor.table.mergeCells') }}
 				</BaseButton>
 				<BaseButton
 					class="editor-toolbar__button"
-					:disabled="!editor.can().splitCell"
 					@click="editor.chain().focus().splitCell().run()"
 				>
 					{{ $t('input.editor.table.splitCell') }}
 				</BaseButton>
 				<BaseButton
 					class="editor-toolbar__button"
-					:disabled="!editor.can().toggleHeaderColumn"
 					@click="editor.chain().focus().toggleHeaderColumn().run()"
 				>
 					{{ $t('input.editor.table.toggleHeaderColumn') }}
 				</BaseButton>
 				<BaseButton
 					class="editor-toolbar__button"
-					:disabled="!editor.can().toggleHeaderRow"
 					@click="editor.chain().focus().toggleHeaderRow().run()"
 				>
 					{{ $t('input.editor.table.toggleHeaderRow') }}
 				</BaseButton>
 				<BaseButton
 					class="editor-toolbar__button"
-					:disabled="!editor.can().toggleHeaderCell"
 					@click="editor.chain().focus().toggleHeaderCell().run()"
 				>
 					{{ $t('input.editor.table.toggleHeaderCell') }}
 				</BaseButton>
 				<BaseButton
 					class="editor-toolbar__button"
-					:disabled="!editor.can().mergeOrSplit"
 					@click="editor.chain().focus().mergeOrSplit().run()"
 				>
 					{{ $t('input.editor.table.mergeOrSplit') }}
 				</BaseButton>
 				<BaseButton
 					class="editor-toolbar__button"
-					:disabled="!editor.can().fixTables"
 					@click="editor.chain().focus().fixTables().run()"
 				>
 					{{ $t('input.editor.table.fixTables') }}
@@ -368,12 +354,40 @@ import type {Editor} from '@tiptap/vue-3'
 
 import BaseButton from '@/components/base/BaseButton.vue'
 import {setLinkInEditor} from '@/components/input/editor/setLinkInEditor'
+import {useEditorState} from '@/components/input/editor/useEditorState'
 
 const props = defineProps<{
 	editor: Editor,
 }>()
 
 const emit = defineEmits(['imageUploadClicked'])
+
+const ACTIVE_CHECKS = [
+	'bold',
+	'italic',
+	'underline',
+	'strike',
+	'codeBlock',
+	'blockquote',
+	'bulletList',
+	'orderedList',
+	'taskList',
+	'link',
+	'paragraph',
+	'table',
+] as const
+
+const {state: active} = useEditorState(() => props.editor, editor => {
+	const snapshot: Record<string, boolean> = {
+		heading1: editor.isActive('heading', {level: 1}),
+		heading2: editor.isActive('heading', {level: 2}),
+		heading3: editor.isActive('heading', {level: 3}),
+	}
+	for (const name of ACTIVE_CHECKS) {
+		snapshot[name] = editor.isActive(name)
+	}
+	return snapshot
+})
 
 const tableMode = ref(false)
 
