@@ -10,12 +10,12 @@ on:
     tags:
       - v*
     branches:
-      - main
+      - distressingly-plausible
 
 concurrency:
   # main merges use a unique run_id so they don't cancel each other
   # other branches or PRs share a group to auto-cancel old runs
-  group: ${{ github.ref == 'refs/heads/main' &&
+  group: ${{ github.ref == 'refs/heads/distressingly-plausible' &&
     format('{0}-{1}', github.workflow, github.run_id) ||
     format('{0}-{1}', github.workflow, github.event.pull_request.number || github.ref) }}
   cancel-in-progress: true
@@ -28,7 +28,7 @@ jobs:
 
   release:
     name: Release
-    if: ${{ github.ref_type == 'tag' || github.ref_name == 'main' }}
+    if: ${{ github.ref_type == 'tag' || github.ref_name == 'distressingly-plausible' }}
     uses: ./.github/workflows/release.yml
     needs:
       - test
