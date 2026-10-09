@@ -36,7 +36,7 @@ jobs:
           platforms: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8
           push: true
           tags: |
-            ghcr.io/AstraLuma/vikunja:unstable
+            ghcr.io/astraluma/vikunja:unstable
           build-args: |
             RELEASE_VERSION=${{ steps.ghd.outputs.describe }}
       - name: Build and push version
